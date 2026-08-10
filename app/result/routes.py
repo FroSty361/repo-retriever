@@ -1,8 +1,9 @@
 from flask import Flask, render_template , request
 from . import result
+from markupsafe import Markup
 
 @result.route("/repo-result/")
 def repo_result():
-    repo_name = request.args.get("repo_name")
+    repo = request.args.get("repo")
 
-    return render_template("result/result.html", repo_name=repo_name)
+    return render_template("result/result.html", repo=Markup(repo))

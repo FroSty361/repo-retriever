@@ -2,6 +2,8 @@
 
 {% block stylesheets %}
 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
+
 {% endblock %}
 
 {% block title %} RepoRetriever Result - {{ repo_name }} {% endblock %}
@@ -9,5 +11,19 @@
 {% block header %}
 
 <h1 id="title">Results From {{ repo_name }}</h1>
+
+{% endblock %}
+
+{% block content %}
+
+<ul id="myUL">
+  {{ repo | safe }}
+</ul>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="{{ url_for('static', filename='js/repo-tree.js') }}"></script>
 
 {% endblock %}

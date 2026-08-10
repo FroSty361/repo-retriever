@@ -15,8 +15,8 @@ def index():
 
             return render_template("home/index.html")
 
-        print(data.name)
+        print(data)
 
-        return redirect(url_for('result.repo_result', repo_name=data.name))
+        return redirect(url_for('result.repo_result', repo=data))
 
     return render_template("home/index.html")

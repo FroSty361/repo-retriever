@@ -9,7 +9,7 @@ load_dotenv()
 
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 
-def get_github_repo_data(repoOwner: str, repoName: str) -> RepoContentItem | None:
+def get_github_repo_data(repoOwner: str, repoName: str) -> str | None:
     repoURL = f"https://api.github.com/repos/{repoOwner}/{repoName}"
 
     headers = {
@@ -26,6 +26,9 @@ def get_github_repo_data(repoOwner: str, repoName: str) -> RepoContentItem | Non
 
         root_directory = RepoDirectory(name=repoName, url=repoURL, parent_folder="")
 
+        html = f"<li><span class='caret'>{repoName}</span>\n"
+        html += "<ul class='nested'>\n"
+
         for page in data:
             if page["type"] == "file":
                 name: str = page["name"]
@@ -36,17 +39,24 @@ def get_github_repo_data(repoOwner: str, repoName: str) -> RepoContentItem | Non
                 repo_file: RepoFile = RepoFile(name=name, url=url, parent_folder=parent_folder, download_url=download_url)
 
                 root_directory.files.append(repo_file)
+
+                html += f"<li>{name}</li>\n"
             elif page["type"] == "dir":
-                sub_directory: RepoDirectory = get_github_repo_directory_content(page["name"], page["url"], root_directory.url)
+                sub_directory = get_github_repo_directory_content(page["name"], page["url"], root_directory.url)
 
                 if sub_directory is not None:
-                    root_directory.directories.append(sub_directory)
+                    # root_directory.directories.append(sub_directory)
 
-        return root_directory
+                    html += sub_directory
+
+        html += "</ul>\n"
+        html += "</li>\n"
+
+        return html
     else:
         return None
 
-def get_github_repo_directory_content(name: str, url: str, parent_directory_url: str) -> RepoContentItem | None:
+def get_github_repo_directory_content(name: str, url: str, parent_directory_url: str) -> str | None:
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json"
@@ -61,6 +71,9 @@ def get_github_repo_directory_content(name: str, url: str, parent_directory_url:
 
     directory = RepoDirectory(name=name, url=url, parent_folder=parent_directory_url)
 
+    html = f"<li><span class='caret'>{name}</span>\n"
+    html += "<ul class='nested'>\n"
+
     print(data)
 
     for page in data:
@@ -73,13 +86,20 @@ def get_github_repo_directory_content(name: str, url: str, parent_directory_url:
             repo_file: RepoFile = RepoFile(name=file_name, url=file_url, parent_folder=parent_folder, download_url=download_url)
 
             directory.files.append(repo_file)
+
+            html += f"<li>{file_name}</li>\n"
         elif page["type"] == "dir":
             dir_name: str = page["name"]
             dir_url: str = page["url"]
 
-            sub_directory: RepoDirectory = get_github_repo_directory_content(dir_name, dir_url, directory.url)
+            sub_directory = get_github_repo_directory_content(dir_name, dir_url, directory.url)
 
             if sub_directory is not None:
-                directory.directories.append(sub_directory)
+                # directory.directories.append(sub_directory)
 
-    return directory
+                html += sub_directory
+
+    html += "</ul>\n"
+    html += "</li>\n"
+
+    return html
