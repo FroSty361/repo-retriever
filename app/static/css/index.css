@@ -1,14 +1,3 @@
-body {
-    background-color: #909692;
-}
-
-#title {
-    color: #101411;
-    font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
-
-    text-align: center;
-}
-
 #repositoryFormContainer {
     display: flex;
     justify-content: center;

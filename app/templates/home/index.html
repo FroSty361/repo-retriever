@@ -1,29 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RepoRetriever</title>
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/icons/favicon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-</head>
-<body>
-    <header>
-        <h1 id="title">GitHub Downloader</h1>
-    </header>
+{% extends "base.html" %}
 
-    <main>
-        <div id="repositoryFormContainer">
-            <form id="repositoryForm" action="/" method="post">
-                <label for="repoOwner">GitHub Repository Owner</label>
-                <input type="text" id="repoOwner" name="repoOwner" pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" required />
+{% block stylesheets %}
 
-                <label for="repoName">GitHub Repository Name</label>
-                <input type="text" id="repoName" name="repoName" pattern="^[a-zA-Z0-9._-]{1,100}$" required />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 
-                <input type="submit" name="Submit" style="font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;">
-            </form>
-        </div>
-    </main>
-</body>
-</html>
+{% endblock %}
+
+{% block header %}
+
+<h1 id="title">GitHub Downloader</h1>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div id="repositoryFormContainer">
+    <form id="repositoryForm" action="/" method="post">
+        <label for="repoOwner">GitHub Repository Owner</label>
+        <input type="text" id="repoOwner" name="repoOwner" pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" required />
+
+        <label for="repoName">GitHub Repository Name</label>
+        <input type="text" id="repoName" name="repoName" pattern="^[a-zA-Z0-9._-]{1,100}$" required />
+
+        <input type="submit" name="Submit" style="font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;">
+    </form>
+</div>
+
+{% endblock %}

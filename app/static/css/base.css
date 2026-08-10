@@ -1,0 +1,14 @@
+body {
+    background-color: #909692;
+}
+
+header {
+    background-color: #E4EBE6;
+}
+
+#title {
+    color: #101411;
+    font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+
+    text-align: center;
+}

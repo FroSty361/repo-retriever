@@ -3,4 +3,6 @@ from . import result
 
 @result.route("/repo-result/")
 def repo_result():
-    return render_template("result/result.html", repo_name="Hi!")
+    repo_name = request.args.get("repo_name")
+
+    return render_template("result/result.html", repo_name=repo_name)

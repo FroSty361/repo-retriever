@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>RepoRetriever Result - {{ repo_name }}</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block stylesheets %}
+
+{% endblock %}
+
+{% block title %} RepoRetriever Result - {{ repo_name }} {% endblock %}
+
+{% block header %}
+
+<h1 id="title">Results From {{ repo_name }}</h1>
+
+{% endblock %}
