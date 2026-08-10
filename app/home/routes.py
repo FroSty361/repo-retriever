@@ -1,5 +1,4 @@
-from flask import Flask, render_template , request
-
+from flask import Flask, render_template, request, redirect, url_for
 from services import github_api
 from . import home
 
@@ -9,13 +8,15 @@ def index():
         repoOwner = str(request.form.get("repoOwner"))
         repoName = str(request.form.get("repoName"))
 
-        data, result = github_api.get_github_repo_data(repoOwner, repoName)
+        data = github_api.get_github_repo_data(repoOwner, repoName)
 
-        if not result:
+        if data is None:
             print(f"Failed To Get Data For Github Repository By Owner {repoOwner} And Name {repoName}")
 
             return render_template("home/index.html")
 
-        return render_template("home/index.html")
+        print(data.name)
+
+        return redirect(url_for('result.repo_result'))
 
     return render_template("home/index.html")

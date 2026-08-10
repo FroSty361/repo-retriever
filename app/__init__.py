@@ -6,4 +6,7 @@ def create_app():
     from home import home
     app.register_blueprint(home)
 
+    from result import result
+    app.register_blueprint(result)
+
     return app
