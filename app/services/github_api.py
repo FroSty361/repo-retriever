@@ -63,8 +63,6 @@ def get_github_repo_directory_html(name: str, url: str) -> str | None:
     html = f"<li><span class='caret'><a href='{url}'>{name}</a></span>\n"
     html += "<ul class='nested'>\n"
 
-    print(data)
-
     for page in data:
         if page["type"] == "file":
             file_name: str = page["name"]
@@ -107,10 +105,41 @@ def get_file_data(file_url: str) -> dict | None:
     file_data["name"] = data["name"]
     file_data["path"] = data["path"]
 
+    unviewable_mime_types = [ "image/png", "image/jpeg", "image/gif", "image/avif",
+                              "audio/mpeg", "video/mp4", "video/x-msvideo",
+                              "video/x-msvideo", "video/x-msvideo", "video/x-msvideo",
+                              "application/octet-stream", "application/x-dosexec",
+                              "application/zip", "application/x-tar", "application/x-gzip"
+                              "application/pdf"]
+
+    try:
+        response = requests.head(data["download_url"], allow_redirects=True)
+
+        mime_type = response.headers.get("Content-Type")
+
+        if mime_type:
+            mime_type = mime_type.split(";")[0].strip()
+
+        if mime_type in unviewable_mime_types:
+            file_data["content"] = f"MIME Type {mime_type} Is Unviewable"
+
+            print(file_data["content"])
+
+            return file_data
+    except requests.exceptions.RequestException as e:
+        print(f"Could Not Fetch File Download URL For Getting MIME Type. Sending Current Data. Error = {e}")
+
+        return file_data
+
     content_encoded = data["content"]
     content_decoded_bytes = base64.b64decode(content_encoded.encode('utf-8'))
     content = content_decoded_bytes.decode('utf-8')
 
+    content = content.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+    content = content.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
+    content = content.replace("   ", "&nbsp;&nbsp;&nbsp;&nbsp;")
+    content = content.replace("    ", "&nbsp;&nbsp;&nbsp;&nbsp;")
+    content = content.replace('\n', '<br>')
     file_data["content"] = content
 
     return file_data

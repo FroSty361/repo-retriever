@@ -1,0 +1,32 @@
+.code-container {
+  background-color: #E4EBE6;
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 80vw;
+  margin: 20px auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.code-header {
+  background-color: #B6BFB8;
+  padding: 10px 16px;
+  border-bottom: 1px solid #F2F5F3;
+}
+
+.file-name {
+  color: #232925;
+  font-size: 14px;
+}
+
+pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+code {
+  color: #101411;
+  font-size: 14px;
+  line-height: 1.5;
+  display: block;
+}

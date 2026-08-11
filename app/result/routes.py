@@ -23,4 +23,4 @@ def view_file(file_url_encoded):
 
     file_data = github_api.get_file_data(file_url)
 
-    return render_template("result/file-view.html", file_name=file_data["name"], file_path=file_data["path"])
+    return render_template("result/file-view.html", file_name=file_data["name"], file_path=file_data["path"], file_content=file_data["content"])

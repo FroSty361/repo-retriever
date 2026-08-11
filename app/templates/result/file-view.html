@@ -13,3 +13,17 @@
 <h1 id="title">File {{ file_path }}</h1>
 
 {% endblock %}
+
+{% block content %}
+
+<div class="code-container">
+  <div class="code-header">
+    <span class="file-name">{{ file_path }}</span>
+  </div>
+  <pre>
+      <code>
+          {{ file_content | safe }}
+      </code>
+  </pre>
+</div>
+{% endblock %}
