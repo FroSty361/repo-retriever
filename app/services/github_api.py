@@ -8,7 +8,7 @@ load_dotenv()
 
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 
-def get_github_repo_data(repoOwner: str, repoName: str) -> str | None:
+def get_github_repo_directory_tree(repoOwner: str, repoName: str) -> str | None:
     repoURL = f"https://api.github.com/repos/{repoOwner}/{repoName}"
 
     headers = {
@@ -30,13 +30,12 @@ def get_github_repo_data(repoOwner: str, repoName: str) -> str | None:
                 file_url: str = page["url"]
                 file_url_encoded_bytes = base64.urlsafe_b64encode(file_url.encode('utf-8'))
                 file_url_encoded = file_url_encoded_bytes.decode('utf-8')
-                download_url = page["download_url"]
 
                 view_file_link = url_for('result.view_file', file_url_encoded=file_url_encoded)
 
                 html += f"<li><a href='{view_file_link}'>{file_name}</a></li>\n"
             elif page["type"] == "dir":
-                sub_directory = get_github_repo_directory_content(page["name"], page["url"])
+                sub_directory = get_github_repo_directory_html(page["name"], page["url"])
 
                 if sub_directory is not None:
                     html += sub_directory
@@ -48,7 +47,7 @@ def get_github_repo_data(repoOwner: str, repoName: str) -> str | None:
     else:
         return None
 
-def get_github_repo_directory_content(name: str, url: str) -> str | None:
+def get_github_repo_directory_html(name: str, url: str) -> str | None:
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json"
@@ -72,7 +71,6 @@ def get_github_repo_directory_content(name: str, url: str) -> str | None:
             file_url: str = page["url"]
             file_url_encoded_bytes = base64.urlsafe_b64encode(file_url.encode('utf-8'))
             file_url_encoded = file_url_encoded_bytes.decode('utf-8')
-            download_url = page["download_url"]
 
             view_file_link = url_for('result.view_file', file_url_encoded=file_url_encoded)
 
@@ -81,7 +79,7 @@ def get_github_repo_directory_content(name: str, url: str) -> str | None:
             dir_name: str = page["name"]
             dir_url: str = page["url"]
 
-            sub_directory = get_github_repo_directory_content(dir_name, dir_url)
+            sub_directory = get_github_repo_directory_html(dir_name, dir_url)
 
             if sub_directory is not None:
                 html += sub_directory

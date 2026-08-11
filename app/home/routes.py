@@ -10,7 +10,7 @@ def index():
         repoOwner = str(request.form.get("repoOwner"))
         repoName = str(request.form.get("repoName"))
 
-        repo_html = github_api.get_github_repo_data(repoOwner, repoName)
+        repo_html = github_api.get_github_repo_directory_tree(repoOwner, repoName)
 
         if repo_html is None or repo_html == "":
             print(f"Failed To Get Data For Github Repository By Owner {repoOwner} And Name {repoName}")
