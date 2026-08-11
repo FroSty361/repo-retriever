@@ -1,9 +1,8 @@
+import base64
 import os
 import requests
-import base64
-from typing import List
-from models.repo_content_models import RepoContentItem, RepoFile, RepoDirectory
 from dotenv import load_dotenv
+from flask import url_for
 
 load_dotenv()
 
@@ -19,34 +18,27 @@ def get_github_repo_data(repoOwner: str, repoName: str) -> str | None:
 
     response = requests.get(f"{repoURL}/contents", headers=headers)
 
-    print(response.status_code)
-
     if response.status_code == 200:
         data = response.json()
 
-        root_directory = RepoDirectory(name=repoName, url=repoURL, parent_folder="")
-
-        html = f"<li><span class='caret'>{repoName}</span>\n"
+        html = f"<li><span class='caret'><a href='https://github.com/{repoOwner}/{repoName}'>{repoName}</a></span>\n"
         html += "<ul class='nested'>\n"
 
         for page in data:
             if page["type"] == "file":
-                name: str = page["name"]
-                url: str = page["url"]
-                parent_folder: str = root_directory.url
+                file_name: str = page["name"]
+                file_url: str = page["url"]
+                file_url_encoded_bytes = base64.urlsafe_b64encode(file_url.encode('utf-8'))
+                file_url_encoded = file_url_encoded_bytes.decode('utf-8')
                 download_url = page["download_url"]
 
-                repo_file: RepoFile = RepoFile(name=name, url=url, parent_folder=parent_folder, download_url=download_url)
+                view_file_link = url_for('result.view_file', file_url_encoded=file_url_encoded)
 
-                root_directory.files.append(repo_file)
-
-                html += f"<li>{name}</li>\n"
+                html += f"<li><a href='{view_file_link}'>{file_name}</a></li>\n"
             elif page["type"] == "dir":
-                sub_directory = get_github_repo_directory_content(page["name"], page["url"], root_directory.url)
+                sub_directory = get_github_repo_directory_content(page["name"], page["url"])
 
                 if sub_directory is not None:
-                    # root_directory.directories.append(sub_directory)
-
                     html += sub_directory
 
         html += "</ul>\n"
@@ -56,7 +48,7 @@ def get_github_repo_data(repoOwner: str, repoName: str) -> str | None:
     else:
         return None
 
-def get_github_repo_directory_content(name: str, url: str, parent_directory_url: str) -> str | None:
+def get_github_repo_directory_content(name: str, url: str) -> str | None:
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json"
@@ -69,9 +61,7 @@ def get_github_repo_directory_content(name: str, url: str, parent_directory_url:
 
     data = response.json()
 
-    directory = RepoDirectory(name=name, url=url, parent_folder=parent_directory_url)
-
-    html = f"<li><span class='caret'>{name}</span>\n"
+    html = f"<li><span class='caret'><a href='{url}'>{name}</a></span>\n"
     html += "<ul class='nested'>\n"
 
     print(data)
@@ -80,26 +70,49 @@ def get_github_repo_directory_content(name: str, url: str, parent_directory_url:
         if page["type"] == "file":
             file_name: str = page["name"]
             file_url: str = page["url"]
-            parent_folder: str = directory.url
+            file_url_encoded_bytes = base64.urlsafe_b64encode(file_url.encode('utf-8'))
+            file_url_encoded = file_url_encoded_bytes.decode('utf-8')
             download_url = page["download_url"]
 
-            repo_file: RepoFile = RepoFile(name=file_name, url=file_url, parent_folder=parent_folder, download_url=download_url)
+            view_file_link = url_for('result.view_file', file_url_encoded=file_url_encoded)
 
-            directory.files.append(repo_file)
-
-            html += f"<li>{file_name}</li>\n"
+            html += f"<li><a href='{view_file_link}'>{file_name}</a></li>\n"
         elif page["type"] == "dir":
             dir_name: str = page["name"]
             dir_url: str = page["url"]
 
-            sub_directory = get_github_repo_directory_content(dir_name, dir_url, directory.url)
+            sub_directory = get_github_repo_directory_content(dir_name, dir_url)
 
             if sub_directory is not None:
-                # directory.directories.append(sub_directory)
-
                 html += sub_directory
 
     html += "</ul>\n"
     html += "</li>\n"
 
     return html
+
+def get_file_data(file_url: str) -> dict | None:
+    headers = {
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    response = requests.get(file_url, headers=headers)
+
+    if response.status_code != 200:
+        return None
+
+    data = response.json()
+
+    file_data = {}
+
+    file_data["name"] = data["name"]
+    file_data["path"] = data["path"]
+
+    content_encoded = data["content"]
+    content_decoded_bytes = base64.b64decode(content_encoded.encode('utf-8'))
+    content = content_decoded_bytes.decode('utf-8')
+
+    file_data["content"] = content
+
+    return file_data

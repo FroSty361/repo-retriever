@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block stylesheets %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/file-view.css') }}">
+
+{% endblock %}
+
+{% block title %} RepoRetriever File - {{ file_name }} {% endblock %}
+
+{% block header %}
+
+<h1 id="title">File {{ file_path }}</h1>
+
+{% endblock %}
