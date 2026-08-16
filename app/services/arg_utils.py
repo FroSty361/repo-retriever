@@ -11,9 +11,9 @@ def encode_string(s: str) -> str:
 def decode_string(s: str) -> str:
     string_bytes = s.encode('utf-8')
 
-    string_encoded_bytes = base64.b64decode(string_bytes)
+    decoded_bytes = base64.b64decode(string_bytes)
 
-    return string_encoded_bytes.decode('utf-8')
+    return decoded_bytes.decode('utf-8')
 
 def encode_url_string(s: str) -> str:
     string_bytes = s.encode('utf-8')

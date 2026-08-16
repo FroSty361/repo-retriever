@@ -1,20 +1,27 @@
 import base64
-from flask import Flask, render_template , request
-
-from services import github_api
+from flask import Flask, render_template , request, redirect, url_for
+from services import github_api, arg_utils
 from . import result
 from markupsafe import Markup
 
-@result.route("/repo-result/")
+@result.route("/repo-result/", methods=["GET", "POST"])
 def repo_result():
-    repo_name = request.args.get('repo_name')
+    if request.method == "POST":
+        repoOwner = str(request.form.get("repoOwner"))
+        repoName = str(request.form.get("repoName"))
 
-    encoded_repo_html = Markup(request.args.get("repo"))
+        repo_html = github_api.get_github_repo_directory_tree(repoOwner, repoName)
 
-    repo_html_decoded_bytes = base64.urlsafe_b64decode(encoded_repo_html.encode('utf-8'))
-    repo_html = repo_html_decoded_bytes.decode('utf-8')
+        if repo_html is None or repo_html == "":
+            print(f"Failed To Get Data For Github Repository By Owner {repoOwner} And Name {repoName}")
 
-    return render_template("result/result.html", repo_name=repo_name, repo=repo_html)
+            return redirect(url_for('home.index'))
+
+        print(repo_html)
+
+        return render_template("result/result.html", repo_name=repoName, repo=Markup(repo_html))
+
+    return redirect(url_for('home.index'))
 
 @result.route("/view-file/<file_url_encoded>")
 def view_file(file_url_encoded):
