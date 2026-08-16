@@ -1,10 +1,20 @@
+#directoryTreeContainer {
+  background-color: #B6BFB8;
+
+  border-style: double;
+
+  margin: 1%;
+  padding: 1%;
+}
+
 /* Remove default bullets */
-ul, #myUL {
+ul, #directoryTree {
   list-style-type: none;
+  font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
 }
 
 /* Remove margins and padding from the parent ul */
-#myUL {
+#directoryTree {
   margin: 0;
   padding: 0;
 }
@@ -18,7 +28,7 @@ ul, #myUL {
 /* Create the caret/arrow with a unicode, and style it */
 .caret::before {
   content: "\25B6";
-  color: black;
+  color: #909692;
   display: inline-block;
   margin-right: 6px;
 }

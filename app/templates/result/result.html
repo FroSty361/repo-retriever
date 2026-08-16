@@ -15,10 +15,11 @@
 {% endblock %}
 
 {% block content %}
-
-<ul id="myUL">
-  {{ repo | safe }}
-</ul>
+<div id="directoryTreeContainer">
+  <ul id="directoryTree">
+    {{ repo | safe }}
+  </ul>
+</div>
 
 {% endblock %}
 

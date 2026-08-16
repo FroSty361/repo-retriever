@@ -17,13 +17,13 @@
 
 <div id="repositoryFormContainer">
     <form id="repositoryForm" action="/repo-result/" method="post">
-        <label for="repoOwner">GitHub Repository Owner</label>
-        <input type="text" id="repoOwner" name="repoOwner" pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" required />
+        <label for="repoOwner" class="repositoryFormElement">GitHub Repository Owner</label>
+        <input type="text" id="repoOwner" class="repositoryFormElement" name="repoOwner" pattern="^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$" required />
 
-        <label for="repoName">GitHub Repository Name</label>
-        <input type="text" id="repoName" name="repoName" pattern="^[a-zA-Z0-9._-]{1,100}$" required />
+        <label for="repoName" class="repositoryFormElement">GitHub Repository Name</label>
+        <input type="text" id="repoName" class="repositoryFormElement" name="repoName" pattern="^[a-zA-Z0-9._-]{1,100}$" required />
 
-        <input type="submit" name="Submit" style="font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;">
+        <input type="submit" class="repositoryFormElement" name="Submit" style="font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;">
     </form>
 </div>
 

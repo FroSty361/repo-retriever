@@ -9,7 +9,25 @@
     background-color: #B6BFB8;
     color: #232925;
     font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+    text-align: center;
+
+    padding: 1%;
+
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     width: 100%;
-    max-width: 400px;
+    max-width: fit-content;
+}
+
+#repositoryForm input {
+    background-color: #e4ebe6;
+
+    border-style: solid;
+}
+
+.repositoryFormElement {
+    margin: 3%;
 }

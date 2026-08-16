@@ -1,12 +1,12 @@
 body {
-    background-color: #909692;
+    background-color: #E4EBE6;
 
     margin: 0;
     padding: 0;
 }
 
 header {
-    background-color: #E4EBE6;
+    background-color: #909692;
     height: 10vh;
 
     display: flex;
