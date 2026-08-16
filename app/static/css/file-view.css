@@ -4,7 +4,7 @@
   overflow: hidden;
   max-width: 80vw;
   margin: 20px auto;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
 }
 
 .code-header {
