@@ -1,12 +1,12 @@
 body {
-    background-color: #E4EBE6;
+    background-color: var(--background-color);
 
     margin: 0;
     padding: 0;
 }
 
 header {
-    background-color: #909692;
+    background-color: var(--header-color);
     height: 10vh;
 
     display: flex;
@@ -24,7 +24,7 @@ header h1 {
 }
 
 #title {
-    color: #101411;
+    color: var(--title-text-color);
     font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
 
     font-size: 200%;

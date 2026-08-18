@@ -1,5 +1,5 @@
 #directoryTreeContainer {
-  background-color: #B6BFB8;
+  background-color: var(--sections-backgorund-color);
 
   border-style: double;
 
@@ -28,7 +28,7 @@ ul, #directoryTree {
 /* Create the caret/arrow with a unicode, and style it */
 .caret::before {
   content: "\25B6";
-  color: #909692;
+  color: var(--sections-misc-backgorund-color);
   display: inline-block;
   margin-right: 6px;
 }

@@ -1,0 +1,49 @@
+:root {
+    color-scheme: light;
+
+    --background-color: #E4EBE6;
+    --header-color:  #909692;
+
+    --title-text-color: #101411;
+
+    --sections-backgorund-color: #B6BFB8;
+    --sections-inputs-backgorund-color: #e4ebe6;
+    --sections-misc-backgorund-color: #909692;
+    --sections-text-color: #232925;
+
+    --code-text-color: #101411;
+}
+
+:root.dark-mode {
+    color-scheme: dark;
+
+    --background-color: #909692;
+    --header-color:  #101411;
+
+    --title-text-color: #F2F5F3;
+
+    --sections-backgorund-color: #232925;
+    --sections-inputs-backgorund-color: #909692;
+    --sections-misc-backgorund-color: #B6BFB8;
+    --sections-text-color: #E4EBE6;
+
+    --code-text-color: #F2F5F3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+      color-scheme: dark;
+
+    --background-color: #909692;
+    --header-color:  #101411;
+
+    --title-text-color: #F2F5F3;
+
+    --sections-backgorund-color: #232925;
+    --sections-inputs-backgorund-color: #909692;
+    --sections-misc-backgorund-color: #B6BFB8;
+    --sections-text-color: #E4EBE6;
+
+    --code-text-color: #F2F5F3;
+  }
+}
