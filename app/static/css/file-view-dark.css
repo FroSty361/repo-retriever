@@ -1,5 +1,5 @@
 .code-container {
-  background-color: #B6BFB8;
+  background-color: #232925;
   border-radius: 6px;
   overflow: hidden;
   max-width: 80vw;
@@ -8,13 +8,13 @@
 }
 
 .code-header {
-  background-color: #909692;
+  background-color: #101411;
   padding: 10px 16px;
   border-bottom: 1px solid #F2F5F3;
 }
 
 .file-name {
-  color: #232925;
+  color: #F2F5F3;
   font-size: 14px;
 }
 
@@ -25,7 +25,7 @@ pre {
 }
 
 code {
-  color: #101411;
+  color: #F2F5F3;
   font-size: 14px;
   line-height: 1.5;
   display: block;
