@@ -32,3 +32,25 @@ header h1 {
     text-align: center;
     justify-content: center;
 }
+
+footer {
+    background-color: var(--footer-color);
+    height: 5vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+#colorModeButton {
+    background-color: var(--sections-inputs-backgorund-color);
+    color: var(--sections-text-color);
+    font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+
+    border-style: solid;
+}

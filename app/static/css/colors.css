@@ -3,6 +3,7 @@
 
     --background-color: #E4EBE6;
     --header-color:  #909692;
+    --footer-color: #d8ddd9;
 
     --title-text-color: #101411;
 
@@ -17,8 +18,9 @@
 :root.dark-mode {
     color-scheme: dark;
 
-    --background-color: #909692;
+    --background-color: #7a7e7b;
     --header-color:  #101411;
+    --footer-color: #464947;
 
     --title-text-color: #F2F5F3;
 
@@ -34,8 +36,9 @@
   :root {
       color-scheme: dark;
 
-    --background-color: #909692;
+    --background-color: #7a7e7b;
     --header-color:  #101411;
+    --footer-color: #464947;
 
     --title-text-color: #F2F5F3;
 
