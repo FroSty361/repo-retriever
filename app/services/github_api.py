@@ -1,22 +1,24 @@
 import base64
 import os
-import requests
+import httpx
 from dotenv import load_dotenv
 from flask import url_for
+import asyncio
 
 load_dotenv()
 
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 
-def get_github_repo_directory_tree(repoOwner: str, repoName: str) -> str | None:
-    repoURL = f"https://api.github.com/repos/{repoOwner}/{repoName}"
+async def get_github_repo_directory_tree(repoOwner: str, repoName: str) -> str | None:
+    async with httpx.AsyncClient() as client:
+        repoURL = f"https://api.github.com/repos/{repoOwner}/{repoName}"
 
-    headers = {
-        "Authorization": f"Bearer {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github+json"
-    }
+        headers = {
+            "Authorization": f"Bearer {GITHUB_TOKEN}",
+            "Accept": "application/vnd.github+json"
+        }
 
-    response = requests.get(f"{repoURL}/contents", headers=headers)
+        response = await client.get(f"{repoURL}/contents", headers=headers)
 
     if response.status_code == 200:
         data = response.json()
@@ -35,7 +37,7 @@ def get_github_repo_directory_tree(repoOwner: str, repoName: str) -> str | None:
 
                 html += f"<li><a href='{view_file_link}'>{file_name}</a></li>\n"
             elif page["type"] == "dir":
-                sub_directory = get_github_repo_directory_html(page["name"], page["url"])
+                sub_directory = await get_github_repo_directory_html(page["name"], page["url"])
 
                 if sub_directory is not None:
                     html += sub_directory
@@ -47,13 +49,14 @@ def get_github_repo_directory_tree(repoOwner: str, repoName: str) -> str | None:
     else:
         return None
 
-def get_github_repo_directory_html(name: str, url: str) -> str | None:
+async def get_github_repo_directory_html(name: str, url: str) -> str | None:
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json"
     }
 
-    response = requests.get(url, headers=headers)
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers)
 
     if response.status_code != 200:
         return None
@@ -77,7 +80,7 @@ def get_github_repo_directory_html(name: str, url: str) -> str | None:
             dir_name: str = page["name"]
             dir_url: str = page["url"]
 
-            sub_directory = get_github_repo_directory_html(dir_name, dir_url)
+            sub_directory = await get_github_repo_directory_html(dir_name, dir_url)
 
             if sub_directory is not None:
                 html += sub_directory
@@ -87,13 +90,14 @@ def get_github_repo_directory_html(name: str, url: str) -> str | None:
 
     return html
 
-def get_file_data(file_url: str) -> dict | None:
+async def get_file_data(file_url: str) -> dict | None:
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json"
     }
 
-    response = requests.get(file_url, headers=headers)
+    async with httpx.AsyncClient() as client:
+        response = await client.get(file_url, headers=headers)
 
     if response.status_code != 200:
         return None
@@ -113,7 +117,8 @@ def get_file_data(file_url: str) -> dict | None:
                               "application/pdf"]
 
     try:
-        response = requests.head(data["download_url"], allow_redirects=True)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(data["download_url"], headers=headers)
 
         mime_type = response.headers.get("Content-Type")
 
@@ -126,7 +131,7 @@ def get_file_data(file_url: str) -> dict | None:
             print(file_data["content"])
 
             return file_data
-    except requests.exceptions.RequestException as e:
+    except httpx.RequestError as e:
         print(f"Could Not Fetch File Download URL For Getting MIME Type. Sending Current Data. Error = {e}")
 
         return file_data
