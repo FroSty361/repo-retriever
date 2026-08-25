@@ -36,3 +36,7 @@
 .repositoryFormElement {
     margin: 3%;
 }
+
+a:link, a:visited, a:hover, a:active {
+    color: var(--title-text-color);
+}
