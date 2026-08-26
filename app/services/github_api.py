@@ -1,4 +1,5 @@
 import base64
+import io
 import os
 import httpx
 from dotenv import load_dotenv
@@ -35,7 +36,7 @@ async def get_github_repo_directory_tree(repoOwner: str, repoName: str) -> str |
 
                 view_file_link = url_for('result.view_file', file_url_encoded=file_url_encoded)
 
-                html += f"<li><a href='{view_file_link}'>{file_name}</a></li>\n"
+                html += f"<li><a href='{view_file_link}'>{file_name}</a>   <button type='button' onclick=\"downloadFile('{file_url_encoded}')\">Download</button></li>\n"
             elif page["type"] == "dir":
                 sub_directory = await get_github_repo_directory_html(page["name"], page["url"])
 
@@ -75,7 +76,7 @@ async def get_github_repo_directory_html(name: str, url: str) -> str | None:
 
             view_file_link = url_for('result.view_file', file_url_encoded=file_url_encoded)
 
-            html += f"<li><a href='{view_file_link}'>{file_name}</a></li>\n"
+            html += f"<li><a href='{view_file_link}'>{file_name}</a>   <button type='button' onclick=\"downloadFile('{file_url_encoded}')\">Download</button></li>\n"
         elif page["type"] == "dir":
             dir_name: str = page["name"]
             dir_url: str = page["url"]
@@ -109,6 +110,8 @@ async def get_file_data(file_url: str) -> dict | None:
     file_data["name"] = data["name"]
     file_data["path"] = data["path"]
 
+    file_data["download_url"] = data["download_url"]
+
     unviewable_mime_types = [ "image/png", "image/jpeg", "image/gif", "image/avif",
                               "audio/mpeg", "video/mp4", "video/x-msvideo",
                               "video/x-msvideo", "video/x-msvideo", "video/x-msvideo",
@@ -140,11 +143,27 @@ async def get_file_data(file_url: str) -> dict | None:
     content_decoded_bytes = base64.b64decode(content_encoded.encode('utf-8'))
     content = content_decoded_bytes.decode('utf-8')
 
-    content = content.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
-    content = content.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
-    content = content.replace("   ", "&nbsp;&nbsp;&nbsp;&nbsp;")
-    content = content.replace("    ", "&nbsp;&nbsp;&nbsp;&nbsp;")
-    content = content.replace('\n', '<br>')
-    file_data["content"] = content
+    html_content = content.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+    html_content = html_content.replace("  ", "&nbsp;&nbsp;&nbsp;&nbsp;")
+    html_content = html_content.replace("   ", "&nbsp;&nbsp;&nbsp;&nbsp;")
+    html_content = html_content.replace("    ", "&nbsp;&nbsp;&nbsp;&nbsp;")
+    html_content = html_content.replace('\n', '<br>')
+    file_data["html_content"] = html_content
 
     return file_data
+
+async def get_raw_file_data(file_download_url: str):
+    headers = {
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(file_download_url, headers=headers)
+
+    if response.status_code != 200:
+        return None, None
+
+    file_stream = io.BytesIO(response.content)
+
+    return file_stream, response.headers.get('Content-Type')
