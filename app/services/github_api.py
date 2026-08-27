@@ -10,54 +10,48 @@ load_dotenv()
 
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 
-async def get_github_repo_directory_tree(repoOwner: str, repoName: str) -> str | None:
-    async with httpx.AsyncClient() as client:
-        repoURL = f"https://api.github.com/repos/{repoOwner}/{repoName}"
-
-        headers = {
-            "Authorization": f"Bearer {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github+json"
-        }
-
-        response = await client.get(f"{repoURL}/contents", headers=headers)
-
-    if response.status_code == 200:
-        data = response.json()
-
-        html = f"<li><span class='caret'><a href='https://github.com/{repoOwner}/{repoName}'>{repoName}</a></span>\n"
-        html += "<ul class='nested'>\n"
-
-        for page in data:
-            if page["type"] == "file":
-                file_name: str = page["name"]
-                file_url: str = page["url"]
-                file_url_encoded_bytes = base64.urlsafe_b64encode(file_url.encode('utf-8'))
-                file_url_encoded = file_url_encoded_bytes.decode('utf-8')
-
-                view_file_link = url_for('result.view_file', file_url_encoded=file_url_encoded)
-
-                html += f"<li><a href='{view_file_link}'>{file_name}</a>   <button type='button' onclick=\"downloadFile('{file_url_encoded}')\">Download</button></li>\n"
-            elif page["type"] == "dir":
-                sub_directory = await get_github_repo_directory_html(page["name"], page["url"])
-
-                if sub_directory is not None:
-                    html += sub_directory
-
-        html += "</ul>\n"
-        html += "</li>\n"
-
-        return html
-    else:
-        return None
-
-async def get_github_repo_directory_html(name: str, url: str) -> str | None:
+async def get_github_repo_directory_tree(repoOwner: str, repoName: str, branch: str = "main") -> str | None:
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json"
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=headers)
+    repoURL = f"https://api.github.com/repos/{repoOwner}/{repoName}/git/trees/{branch}?recursive=1"
+
+    async with httpx.AsyncClient(headers=headers) as httpx_client:
+        response = await httpx_client.get(f"{repoURL}/contents")
+
+        if response.status_code == 200:
+            data = response.json()
+
+            html = f"<li><span class='caret'><a href='https://github.com/{repoOwner}/{repoName}'>{repoName}</a></span>\n"
+            html += "<ul class='nested'>\n"
+
+            for page in data:
+                if page["type"] == "file":
+                    file_name: str = page["name"]
+                    file_url: str = page["url"]
+                    file_url_encoded_bytes = base64.urlsafe_b64encode(file_url.encode('utf-8'))
+                    file_url_encoded = file_url_encoded_bytes.decode('utf-8')
+
+                    view_file_link = url_for('result.view_file', file_url_encoded=file_url_encoded)
+
+                    html += f"<li><a href='{view_file_link}'>{file_name}</a>   <button type='button' onclick=\"downloadFile('{file_url_encoded}')\">Download</button></li>\n"
+                elif page["type"] == "dir":
+                    sub_directory = await get_github_repo_directory_html(page["name"], page["url"], httpx_client)
+
+                    if sub_directory is not None:
+                        html += sub_directory
+
+            html += "</ul>\n"
+            html += "</li>\n"
+
+            return html
+        else:
+            return None
+
+async def get_github_repo_directory_html(name: str, url: str, httpx_client) -> str | None:
+    response = await httpx_client.get(url)
 
     if response.status_code != 200:
         return None
@@ -81,7 +75,7 @@ async def get_github_repo_directory_html(name: str, url: str) -> str | None:
             dir_name: str = page["name"]
             dir_url: str = page["url"]
 
-            sub_directory = await get_github_repo_directory_html(dir_name, dir_url)
+            sub_directory = await get_github_repo_directory_html(dir_name, dir_url, httpx_client)
 
             if sub_directory is not None:
                 html += sub_directory
