@@ -18,6 +18,8 @@ async def get_github_repo_directory_tree(repoOwner: str, repoName: str, branch: 
 
     repoURL = f"https://api.github.com/repos/{repoOwner}/{repoName}/git/trees/{branch}?recursive=1"
 
+    print(repoURL)
+
     async with httpx.AsyncClient(headers=headers) as httpx_client:
         response = await httpx_client.get(f"{repoURL}/contents")
 
@@ -27,21 +29,34 @@ async def get_github_repo_directory_tree(repoOwner: str, repoName: str, branch: 
             html = f"<li><span class='caret'><a href='https://github.com/{repoOwner}/{repoName}'>{repoName}</a></span>\n"
             html += "<ul class='nested'>\n"
 
-            for page in data:
-                if page["type"] == "file":
-                    file_name: str = page["name"]
-                    file_url: str = page["url"]
-                    file_url_encoded_bytes = base64.urlsafe_b64encode(file_url.encode('utf-8'))
+            directory_depths = [0]
+
+            for resource in data["tree"]:
+                name = resource["path"].split("/")[-1]
+                url: str = resource["url"]
+
+                if resource["type"] == "blob":
+                    file_url_encoded_bytes = base64.urlsafe_b64encode(url.encode('utf-8'))
                     file_url_encoded = file_url_encoded_bytes.decode('utf-8')
 
                     view_file_link = url_for('result.view_file', file_url_encoded=file_url_encoded)
 
-                    html += f"<li><a href='{view_file_link}'>{file_name}</a>   <button type='button' onclick=\"downloadFile('{file_url_encoded}')\">Download</button></li>\n"
-                elif page["type"] == "dir":
-                    sub_directory = await get_github_repo_directory_html(page["name"], page["url"], httpx_client)
+                    html += f"<li><a href='{view_file_link}'>{name}</a>   <button type='button' onclick=\"downloadFile('{file_url_encoded}')\">Download</button></li>\n"
+                elif resource["type"] == "tree":
+                    print(resource)
 
-                    if sub_directory is not None:
-                        html += sub_directory
+                    directory_depth = len(resource["path"].split("/"))
+
+                    while directory_depths and directory_depths[-1] >= directory_depth:
+                        html += "</ul>\n"
+                        html += "</li>\n"
+
+                        directory_depths.pop()
+
+                    html += f"<li><span class='caret'><a href='{url}'>{name}</a></span>\n"
+                    html += "<ul class='nested'>\n"
+
+                    directory_depths.append(directory_depth)
 
             html += "</ul>\n"
             html += "</li>\n"
