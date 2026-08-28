@@ -4,7 +4,6 @@ import os
 import httpx
 from dotenv import load_dotenv
 from flask import url_for
-import asyncio
 
 load_dotenv()
 

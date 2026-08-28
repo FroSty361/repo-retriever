@@ -1,5 +1,4 @@
-import base64
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import render_template, request, redirect, url_for, send_file
 from services import github_api, arg_utils
 from . import result
 from markupsafe import Markup
