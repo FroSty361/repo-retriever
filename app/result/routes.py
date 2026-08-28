@@ -3,16 +3,19 @@ from flask import Flask, render_template, request, redirect, url_for, send_file
 from services import github_api, arg_utils
 from . import result
 from markupsafe import Markup
-import asyncio
 
 @result.route("/repo-result/", methods=["GET", "POST"])
 async  def repo_result():
     if request.method == "POST":
         repoOwner = str(request.form.get("repoOwner"))
         repoName = str(request.form.get("repoName"))
+        repoBranch = str(request.form.get("repoBranch"))
+
+        if repoBranch is None or repoBranch == "":
+            repoBranch = "main"
 
         try:
-            repo_html = await github_api.get_github_repo_directory_tree(repoOwner, repoName)
+            repo_html = await github_api.get_github_repo_directory_tree(repoOwner, repoName, repoBranch)
         except Exception as e:
             return f"An Error Occurred When Trying To Receive GitHub Direstory Tree HTML {e}", 500
 
