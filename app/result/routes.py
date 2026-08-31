@@ -27,12 +27,13 @@ async  def repo_result():
 
     return redirect(url_for('home.index'))
 
-@result.route("/view-file/<file_url_encoded>")
-async def view_file(file_url_encoded):
+@result.route("/view-file/<path_encoded>/<file_url_encoded>")
+async def view_file(path_encoded, file_url_encoded):
+    path = arg_utils.decode_url_string(path_encoded)
     file_url = arg_utils.decode_url_string(file_url_encoded)
 
     try:
-        file_data = await github_api.get_file_data(file_url)
+        file_data = await github_api.get_file_data(path, file_url)
     except Exception as e:
         return f"An Error Occurred When Trying To Get File Data For Viewing File {e}", 500
 
@@ -46,12 +47,17 @@ async def view_file(file_url_encoded):
 @result.route('/download-file/', methods=['POST'])
 async def download_file():
     data = request.get_json()
-    file_url_encoded = data["file_url"]
 
+    path_encoded = data["path"]
+    path = arg_utils.decode_url_string(path_encoded)
+
+    file_url_encoded = data["file_url"]
     file_url = arg_utils.decode_url_string(file_url_encoded)
 
     try:
-        file_data = await github_api.get_file_data(file_url)
+        file_data = await github_api.get_file_data(path, file_url)
+
+        print(f"File Data = {file_data}")
     except Exception as e:
         return f"An Error Occurred When Trying To Get File Data For Download {e}", 500
 
@@ -62,6 +68,8 @@ async def download_file():
 
     download_url = file_data["download_url"]
 
+    print(download_url)
+
     try:
         file_stream, content_type = await github_api.get_raw_file_data(download_url)
 
@@ -69,6 +77,8 @@ async def download_file():
             print(f"Failed To Get Raw File Content From {download_url}")
 
             return {"status": "400"}, 400
+
+        print(file_stream)
 
         response = send_file(
             file_stream,
@@ -82,3 +92,48 @@ async def download_file():
         return response
     except Exception as e:
         return f"An Error Occurred When Trying To Get Raw File Data For Download {e}", 500
+
+@result.route('/download-directory/', methods=['POST'])
+async def download_directory():
+    data = request.get_json()
+
+    path_encoded = data["path"]
+    path = arg_utils.decode_url_string(path_encoded)
+
+    directory_url_encoded = data["directory_url"]
+    directory_url = arg_utils.decode_url_string(directory_url_encoded)
+
+    try:
+        directory_data = await github_api.get_directory_data(path, directory_url)
+    except Exception as e:
+        return f"An Error Occurred When Trying To Get Directory Data For Download {e}", 500
+
+    if directory_data is None or directory_data == "":
+        print(f"Failed To Get Directory Data {directory_data} From Github Repository")
+
+        return {"status": "400"}, 400
+
+    url = directory_data["content_url"]
+
+    print(f"URL = {url}")
+
+    try:
+        file_stream = await github_api.get_directory_contents_data(url)
+
+        if file_stream is None:
+            print(f"Failed To Get Raw Directory Content From {url}")
+
+            return {"status": "400"}, 400
+
+        response = send_file(
+            file_stream,
+            as_attachment=True,
+            download_name=f"{directory_data["name"]}.zip",
+            mimetype="application/zip"
+        )
+
+        response.headers["Access-Control-Expose-Headers"] = "Content-Disposition"
+
+        return response
+    except Exception as e:
+        return f"An Error Occurred When Trying To Get Directory Data For Download {e}", 500
