@@ -58,6 +58,8 @@ async def get_github_repo_directory_tree(repoOwner: str, repoName: str, branch: 
                     directory_url_encoded_bytes = base64.urlsafe_b64encode(url.encode('utf-8'))
                     directory_url_encoded = directory_url_encoded_bytes.decode('utf-8')
 
+                    print(f"{url} {directory_url_encoded}")
+
                     html += f"<li><span class='caret'><a href='{url}'>{name}</a>   <button type='button' onclick=\"downloadDirectory('{path_encoded}', '{directory_url_encoded}')\">Download</button></span>\n"
                     html += "<ul class='nested'>\n"
 
@@ -151,9 +153,7 @@ async def get_file_data(path: str, blob_url: str) -> dict | None:
                 mime_type = mime_type.split(";")[0].strip()
 
             if mime_type in unviewable_mime_types:
-                file_data["content"] = f"MIME Type {mime_type} Is Unviewable"
-
-                print(file_data["content"])
+                file_data["html_content"] = f"MIME Type {mime_type} Is Unviewable"
 
                 return file_data
 
