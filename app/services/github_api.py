@@ -64,7 +64,7 @@ async def get_github_repo_directory_tree(repoOwner: str, repoName: str, branch: 
                     directory_url_encoded_bytes = base64.urlsafe_b64encode(url.encode('utf-8'))
                     directory_url_encoded = directory_url_encoded_bytes.decode('utf-8')
 
-                    html += f"<li><span class='caret'><a href='{url}'>{name}</a>   <button type='button' onclick=\"downloadDirectory('{path_encoded}', '{directory_url_encoded}')\">Download</button></span>\n"
+                    html += f"<li><span class='caret'><u>{name}</u>   <button type='button' onclick=\"downloadDirectory('{path_encoded}', '{directory_url_encoded}')\">Download</button></span>\n"
                     html += "<ul class='nested'>\n"
 
                     directory_depths.append(directory_depth)
