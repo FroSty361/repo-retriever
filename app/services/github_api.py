@@ -19,7 +19,7 @@ async def get_github_repo_directory_tree(repoOwner: str, repoName: str, branch: 
     repoURL = f"https://api.github.com/repos/{repoOwner}/{repoName}/git/trees/{branch}?recursive=1"
 
     async with httpx.AsyncClient(headers=headers) as httpx_client:
-        response = await httpx_client.get(f"{repoURL}/contents")
+        response = await httpx_client.get(f"{repoURL}")
 
         if response.status_code == 200:
             data = response.json()
@@ -34,10 +34,11 @@ async def get_github_repo_directory_tree(repoOwner: str, repoName: str, branch: 
                 url: str = resource["url"]
 
                 path = resource["path"]
-                path_encoded_bytes = base64.urlsafe_b64encode(path.encode('utf-8'))
-                path_encoded = path_encoded_bytes.decode('utf-8')
 
                 if resource["type"] == "blob":
+                    path_encoded_bytes = base64.urlsafe_b64encode(path.encode('utf-8'))
+                    path_encoded = path_encoded_bytes.decode('utf-8')
+
                     file_url_encoded_bytes = base64.urlsafe_b64encode(url.encode('utf-8'))
                     file_url_encoded = file_url_encoded_bytes.decode('utf-8')
 
@@ -45,6 +46,11 @@ async def get_github_repo_directory_tree(repoOwner: str, repoName: str, branch: 
 
                     html += f"<li><a href='{view_file_link}'>{name}</a>   <button type='button' onclick=\"downloadFile('{path_encoded}', '{file_url_encoded}')\">Download</button></li>\n"
                 elif resource["type"] == "tree":
+                    path = path.rsplit('/', 1)[0]
+
+                    path_encoded_bytes = base64.urlsafe_b64encode(path.encode('utf-8'))
+                    path_encoded = path_encoded_bytes.decode('utf-8')
+
                     print(resource)
 
                     directory_depth = len(resource["path"].split("/"))
@@ -57,8 +63,6 @@ async def get_github_repo_directory_tree(repoOwner: str, repoName: str, branch: 
 
                     directory_url_encoded_bytes = base64.urlsafe_b64encode(url.encode('utf-8'))
                     directory_url_encoded = directory_url_encoded_bytes.decode('utf-8')
-
-                    print(f"{url} {directory_url_encoded}")
 
                     html += f"<li><span class='caret'><a href='{url}'>{name}</a>   <button type='button' onclick=\"downloadDirectory('{path_encoded}', '{directory_url_encoded}')\">Download</button></span>\n"
                     html += "<ul class='nested'>\n"
@@ -204,11 +208,11 @@ async def get_directory_data(path: str, directory_url: str) -> dict | None:
 
     directory_data = {}
 
-    directory_data["name"] = data[0]["name"]
+    directory_data["name"] = path.split('/')[-1]
 
     directory_data["path"] = path
 
-    directory_data["content_url"] = data[0]["url"]
+    directory_data["content_url"] = content_url
 
     return directory_data
 
@@ -228,35 +232,48 @@ async def get_raw_file_data(file_download_url: str):
 
     return file_stream, response.headers.get('Content-Type')
 
-async def get_directory_contents_data(directory_url: str):
+async def get_directory_contents_data(directory_url: str, path: str):
     headers = {
         "Authorization": f"Bearer {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github+json"
+        "Accept": "application/vnd.github.v3+json"
     }
 
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get(directory_url, headers=headers)
 
         if response.status_code != 200:
             return None
 
-    data = response.json()
+        data = response.json()
 
-    file_stream = io.BytesIO()
+        file_stream = io.BytesIO()
 
-    with zipfile.ZipFile(file_stream, 'w', zipfile.ZIP_DEFLATED) as zf:
-        for item in data:
-            if item['type'] == 'file':
-                file_url = item['download_url']
+        with zipfile.ZipFile(file_stream, 'w', zipfile.ZIP_DEFLATED) as zf:
+            await add_content_to_zip(data, path.split('/')[-1], zf, headers, client)
 
-                if not file_url:
-                    continue
+        file_stream.seek(0)
 
-                file_data_response = await client.get(file_url, headers=headers)
+        return file_stream
 
-                if file_data_response.status_code == 200:
-                    zf.writestr(item["name"], file_data_response.content)
+async def add_content_to_zip(content, current_path: str, zf: zipfile.ZipFile, headers: dict, client):
+    for item in content:
+        if item['type'] == 'file':
+            response = await client.get(item['download_url'])
 
-    file_stream.seek(0)
+            if response.status_code == 200:
+                if current_path:
+                    name = f"{current_path}/{item['name']}"
+                else:
+                    name = item['name']
 
-    return file_stream
+                zf.writestr(name, response.content)
+        elif item['type'] == 'dir':
+            sub_dir_response = await client.get(item['url'], headers=headers)
+
+            if sub_dir_response.status_code == 200:
+                if current_path:
+                    sub_path = f"{current_path}/{item['name']}"
+                else:
+                    sub_path= item['name']
+
+                await add_content_to_zip(sub_dir_response.json(), sub_path, zf, headers, client)

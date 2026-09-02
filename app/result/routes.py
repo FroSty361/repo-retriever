@@ -118,7 +118,7 @@ async def download_directory():
     print(f"URL = {url}")
 
     try:
-        file_stream = await github_api.get_directory_contents_data(url)
+        file_stream = await github_api.get_directory_contents_data(url, path)
 
         if file_stream is None:
             print(f"Failed To Get Raw Directory Content From {url}")
